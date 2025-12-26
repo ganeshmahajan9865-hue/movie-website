@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Details</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    </head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">
+                <h1><a href="/">
+ 🎬
+ MovieHub</a></h1>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div id="movieDetails" class="movie-details-container"></div>
+        <section class="video-section">
+            <h2>Watch Trailer</h2>
+            <div id="videoPlayer"></div>
+        </section>
+        <section class="recommendations-section">
+            <h2>Suggested Movies</h2>
+            <div id="recommendations" class="movie-grid"></div>
+        </section>
+    </main>
+
+    <script>
+        const movieId = new URLSearchParams(location.search).get('id');
+    </script>
+    <script src="/static/js/movie-gh.js"></script>
+</body>
+</html>
