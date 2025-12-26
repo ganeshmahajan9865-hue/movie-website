@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadMovieDetails() {
     try {
-        const response = await fetch(`/api/movie/${movieId}`);
+        const response = await fetch(`api/movie/${movieId}`);
         const movie = await response.json();
         
         displayMovieDetails(movie);
