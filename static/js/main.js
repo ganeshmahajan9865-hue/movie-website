@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadCategories() {
     try {
-        const response = await fetch('/api/movies/categories');
+        const response = await fetch('api/movies/categories');
         const categories = await response.json();
         
         for (const [category, movies] of Object.entries(categories)) {
