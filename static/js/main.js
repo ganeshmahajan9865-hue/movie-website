@@ -34,7 +34,7 @@ function displayMovies(movies, containerId) {
 function createMovieCard(movie) {
     const card = document.createElement('div');
     card.className = 'movie-card';
-    card.onclick = () => window.location.href = `/movie/${movie.id}`;
+    card.onclick = () => window.location.href = `movie.html?id=${movie.id}`;
     
     const posterPath = movie.poster_path  
         ? `${IMAGE_BASE_URL}${movie.poster_path}`  
