@@ -1,98 +1,94 @@
-const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500';
+import { TMDB_API_KEY, TMDB_BASE, IMAGE_BASE_URL } from "./config.js";
 
-// Load movies on page load
-document.addEventListener('DOMContentLoaded', () => {
-    loadCategories();
-    setupSearch();
+const categories = {
+  trending: `${TMDB_BASE}/trending/movie/week?api_key=${TMDB_API_KEY}`,
+  popular: `${TMDB_BASE}/movie/popular?api_key=${TMDB_API_KEY}`,
+  top_rated: `${TMDB_BASE}/movie/top_rated?api_key=${TMDB_API_KEY}`,
+  action: `${TMDB_BASE}/discover/movie?api_key=${TMDB_API_KEY}&with_genres=28`,
+  comedy: `${TMDB_BASE}/discover/movie?api_key=${TMDB_API_KEY}&with_genres=35`,
+  horror: `${TMDB_BASE}/discover/movie?api_key=${TMDB_API_KEY}&with_genres=27`,
+  romance: `${TMDB_BASE}/discover/movie?api_key=${TMDB_API_KEY}&with_genres=10749`,
+  sci_fi: `${TMDB_BASE}/discover/movie?api_key=${TMDB_API_KEY}&with_genres=878`,
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  loadCategories();
+  setupSearch();
 });
 
 async function loadCategories() {
+  for (const [containerId, url] of Object.entries(categories)) {
     try {
-        const response = await fetch('/api/movies/categories');
-        const categories = await response.json();
-        
-        for (const [category, movies] of Object.entries(categories)) {
-            displayMovies(movies, category);
-        }
-    } catch (error) {
-        console.error('Error loading categories:', error);
+      const res = await fetch(url);
+      const data = await res.json();
+      displayMovies(data.results || [], containerId);
+    } catch (e) {
+      console.error("Category load failed:", containerId, e);
     }
+  }
 }
 
 function displayMovies(movies, containerId) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    
-    container.innerHTML = '';
-    
-    movies.forEach(movie => {
-        const movieCard = createMovieCard(movie);
-        container.appendChild(movieCard);
-    });
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = "";
+  movies.forEach((m) => container.appendChild(createMovieCard(m)));
 }
 
 function createMovieCard(movie) {
-    const card = document.createElement('div');
-    card.className = 'movie-card';
-    // Link to static movie.html with query param (works on GitHub Pages)
-    card.onclick = () => window.location.href = `/movie.html?id=${movie.id}`;
-    
-    const posterPath = movie.poster_path  
-        ? `${IMAGE_BASE_URL}${movie.poster_path}`  
-        : 'https://via.placeholder.com/200x300?text=No+Image';
-    
-    card.innerHTML = `
-        <img src="${posterPath}" alt="${movie.title}">
-        <div class="movie-info">
-            <h3>${movie.title}</h3>
-            <p class="rating">
- ⭐
- ${movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'}</p>
-            <p>${movie.release_date ? movie.release_date.substring(0, 4) : 'N/A'}</p>
-        </div>
-    `;
-    
-    return card;
+  const card = document.createElement("div");
+  card.className = "movie-card";
+
+  // Use querystring routing that works on GitHub Pages
+  card.onclick = () => (window.location.href = `movie.html?id=${movie.id}`);
+
+  const posterPath = movie.poster_path
+    ? `${IMAGE_BASE_URL}${movie.poster_path}`
+    : "https://via.placeholder.com/200x300?text=No+Image";
+
+  card.innerHTML = `
+    <img src="${posterPath}" alt="${movie.title || "Movie"}">
+    <div class="movie-info">
+      <h3>${movie.title || "Untitled"}</h3>
+      <p class="rating">${movie.vote_average ? movie.vote_average.toFixed(1) : "N/A"}</p>
+      <p>${movie.release_date ? movie.release_date.substring(0,4) : "N/A"}</p>
+    </div>
+  `;
+  return card;
 }
 
 function setupSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-    
-    searchBtn.addEventListener('click', performSearch);
-    searchInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            performSearch();
-        }
-    });
+  const searchInput = document.getElementById("searchInput");
+  const searchBtn = document.getElementById("searchBtn");
+  searchBtn.addEventListener("click", performSearch);
+  searchInput.addEventListener("keypress", (e) => e.key === "Enter" && performSearch());
 }
 
 async function performSearch() {
-    const query = document.getElementById('searchInput').value.trim();
-    if (!query) return;
-    
-    try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
-        const data = await response.json();
-        
-        const searchResults = document.getElementById('searchResults');
-        const searchResultsContainer = document.getElementById('searchResultsContainer');
-        
-        searchResults.style.display = 'block';
-        searchResultsContainer.innerHTML = '';
-        
-        if (data.results && data.results.length > 0) {
-            data.results.forEach(movie => {
-                const movieCard = createMovieCard(movie);
-                searchResultsContainer.appendChild(movieCard);
-            });
-            
-            // Scroll to results
-            searchResults.scrollIntoView({ behavior: 'smooth' });
-        } else {
-            searchResultsContainer.innerHTML = '<p>No movies found.</p>';
-        }
-    } catch (error) {
-        console.error('Search error:', error);
+  const query = document.getElementById("searchInput").value.trim();
+  if (!query) return;
+
+  const url = `${TMDB_BASE}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`;
+  // TMDB search endpoint looks like this. [web:38]
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const searchResults = document.getElementById("searchResults");
+    const searchResultsContainer = document.getElementById("searchResultsContainer");
+
+    searchResults.style.display = "block";
+    searchResultsContainer.innerHTML = "";
+
+    const results = data.results || [];
+    if (results.length) {
+      results.forEach((m) => searchResultsContainer.appendChild(createMovieCard(m)));
+      searchResults.scrollIntoView({ behavior: "smooth" });
+    } else {
+      searchResultsContainer.innerHTML = "<p>No movies found.</p>";
     }
+  } catch (e) {
+    console.error("Search error:", e);
+  }
 }
