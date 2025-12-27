@@ -72,7 +72,7 @@ async function performSearch() {
     if (!query) return;
     
     try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+        const response = await fetch(`https://your-backend-domain.com/api/search?q=${encodeURIComponent(query)}`);
         const data = await response.json();
         
         const searchResults = document.getElementById('searchResults');
